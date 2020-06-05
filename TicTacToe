@@ -11,23 +11,20 @@ class player:
 class tiktaktoe:
     def __init__(self, root):
         self.master = root
-        self.master.resizable(0, 0)
         self.master.title("tiK taK toe")
+        self.squares = []
 
     def makeGrid(self):
         tile = 0       
         for ROW in range(3):
+            self.master.grid_rowconfigure(ROW, weight = 1)
             for COL in range(3):
+                self.master.grid_columnconfigure(COL, weight = 1)
                 self.tile = Label(self.master, text = grid.tiles[tile])
-                if not gameEnd:
-                    self.tile.bind("<ButtonPress-1>", lambda event, index=tile: self.getClick(event, index))
+                self.tile.bind("<ButtonPress-1>", lambda event, index = tile: self.getClick(event, index))
                 self.tile.config(font = ("Consolas", 45), width = 4, height = 2, bg = "slate grey", borderwidth = 3, relief = "solid")
-                if checkWin(grid):
-                    if tile in checkWin(grid)[1]:
-                        self.tile.config(bg = "lime green")
-                        if len(checkWin(grid)[1]) == 9:
-                            self.tile.config(bg = "red")
                 self.tile.grid(row = ROW, column = COL, sticky = "NSEW")
+                self.squares.append(self.tile)
                 tile += 1
 
     def getClick(self, event, index):
@@ -40,32 +37,26 @@ def checkMove(move):
         return False
     else:
         grid.tiles[move] = gui.currentPlayer.symbol
+        gui.squares[move]["text"] = gui.currentPlayer.symbol
         return True
 
 def checkWin(grid):
     grid = grid.tiles
     
     if grid[0] == grid[1] == grid[2] != ' ':
-        return (True, [0, 1, 2])
-    
+        return (True, [0, 1, 2])    
     if grid[3] == grid[4] == grid[5] != ' ':
-        return (True, [3, 4, 5])
-    
+        return (True, [3, 4, 5])    
     if grid[6] == grid[7] == grid[8] != ' ':
-        return (True, [6, 7, 8])
-    
+        return (True, [6, 7, 8])    
     if grid[3] == grid[6] == grid[0] != ' ':
-        return (True, [3, 6, 0])
-    
+        return (True, [3, 6, 0])    
     if grid[2] == grid[4] == grid[6] != ' ':
-        return (True, [2, 4, 6])
-    
+        return (True, [2, 4, 6])    
     if grid[2] == grid[5] == grid[8] != ' ':
-        return (True, [2, 5, 8])
-    
+        return (True, [2, 5, 8])    
     if grid[0] == grid[4] == grid[8] != ' ':
-        return (True, [0, 4, 8])
-    
+        return (True, [0, 4, 8])    
     if grid[1] == grid[4] == grid[7] != ' ':
         return (True, [1, 4, 7])    
     if ' ' not in grid:
@@ -76,14 +67,21 @@ def checkWin(grid):
 def checkEnd():
     global gameEnd
     if checkWin(grid):
+        winningTiles = checkWin(grid)[1]
         gameEnd = True
-
+        for tile in winningTiles:
+            gui.squares[tile].config(bg = "green4")
+        if len(winningTiles) == 9:
+            for tile in range(9):
+                gui.squares[tile].config(bg = "red4")
+        for tile in range(9):
+            gui.squares[tile].unbind("<ButtonPress-1>")
+                
 def playerSwap():
     global turn
     global gameEnd
     gui.currentPlayer = x if turn == 1 else o
     checkEnd()
-    gui.makeGrid()
     turn = 0 if turn == 1 else 1
     
 turn = 1
@@ -91,5 +89,6 @@ gameEnd = False
 x, o = player("X"), player("O")
 grid = grid([' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '])
 gui = tiktaktoe(Tk())
+gui.makeGrid()
 playerSwap()
 gui.master.mainloop()
